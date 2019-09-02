@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 )
 
@@ -16,15 +17,15 @@ const (
 
 Use "-help" or "-h" for usage instructions.
 `)
-	helpMsg = (`This utility will concurrently run a given number of instances of a script or command 
+	helpMsg = (`This utility will concurrently run a given number of instances of a script or command,
 while ensuring the number of executions does not exceed an informed limit.
 
 Usage:
-fork [ -c | -s ] [ <script_path> | <command> ] -t <total_executions> -l <limit>
+fork -c [ <script_path> | <command> ] -t <total_executions> -l <limit>
 
 Examples:
-$ fork -c "echo TEST: $(date) >> /tmp/out.test" -n 50 -l 10
-$ fork -s "/tmp/test.sh" -n 50 -l 10
+$ fork -c "curl google.com -n 50 -l 10
+$ fork -c "/tmp/test.sh" -n 50 -l 10
 
 This will execute the informed script/command 50 times, limiting concurrency to 10 at the time.
 
@@ -32,11 +33,10 @@ Options:`)
 )
 
 var (
-	wg    sync.WaitGroup
-	path  = flag.String("s", "", "Path for the source script to run.")
-	cmd   = flag.String("c", "", "Command to be executed.")
-	total = flag.Int("t", 2, "Total number of concurrent executions (default is 2).")
-	max   = flag.Int("l", 10, "Limit of instances to be concurrently executed (default is 10).")
+	wg      sync.WaitGroup
+	command = flag.String("c", "", "Path for the source script  or command to be executed.")
+	total   = flag.Int("t", 2, "Total number of concurrent executions (default is 2).")
+	max     = flag.Int("l", 10, "Limit of instances to be concurrently executed (default is 10).")
 )
 
 func main() {
@@ -44,7 +44,7 @@ func main() {
 	flag.Usage = func() {
 		flagSet := flag.CommandLine
 		fmt.Println(helpMsg)
-		order := []string{"c", "s", "t", "l"}
+		order := []string{"c", "t", "l"}
 		for _, name := range order {
 			flag := flagSet.Lookup(name)
 			fmt.Printf("   -%s   ", flag.Name)
@@ -69,11 +69,8 @@ func main() {
 				}
 
 				// Execute a script or command depending on the input of the user
-				if *path != "" && *cmd == "" {
-					execScript(path, total, max, num)
-
-				} else if *cmd != "" && *path == "" {
-					execCmd(cmd, total)
+				if *command != "" {
+					cmdExec(command, total, max, num)
 
 				} else {
 					fmt.Println(errMsg)
@@ -92,12 +89,11 @@ func main() {
 	wg.Wait() // Wait for the threads to finish
 }
 
-func execCmd(cmd *string, total *int) {
-	fmt.Println(*cmd, *total)
-}
+func cmdExec(command *string, total, max *int, num int) {
 
-func execScript(path *string, total, max *int, num int) {
-	cmd := exec.Command(*path)
+	args := strings.Split(*command, " ")
+	cmd := exec.Command(args[0], args[1:]...)
+
 	var stdout, stderr bytes.Buffer
 
 	cmd.Stdout = &stdout
