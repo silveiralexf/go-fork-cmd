@@ -3,11 +3,11 @@
 SYSTEMS=(windows linux freebsd darwin)
 ARCHS=(amd64 386)
 
-clean=$(git status --porcelain --untracked-files=no)
-if [ -n "$clean" ]; then
-   echo "There are uncommited changes"
-   exit 1
-fi
+# clean=$(git status --porcelain --untracked-files=no)
+# if [ -n "$clean" ]; then
+#    echo "There are uncommited changes"
+#    exit 1
+# fi
 
 rev=$(git describe --tags --always)
 if [ -e "$rev" ]; then
@@ -23,7 +23,7 @@ for os in ${SYSTEMS[@]}; do
         if [ $os = "windows" ]; then
             out="${out}.exe"
         fi
-        CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -o "./bin/${rev}/${out}" ./cmd/go-fork-cmd
+        CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -o "./bin/${rev}/${out}" ./cmd/fork
         (
             cd "./bin/$rev"
             sha256sum "$out" > "$out".sha256
