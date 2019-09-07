@@ -1,5 +1,7 @@
 # go-fork-cmd
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/fsilveir/go-fork-cmd)](https://goreportcard.com/report/github.com/fsilveir/go-fork-cmd)
+
 **fork** utility will run a given number of instances of a script or command while ensuring the number of executions does not exceed an informed limit.
 
 This can be specialy useful, when one requires to run the same command or script multiple times but still want to control the volume of executions, like for instance to simulate concurent access to an API using `cURL`.
