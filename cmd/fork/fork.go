@@ -104,6 +104,6 @@ func cmdExec(command *string, total, max *int, num int) {
 		fmt.Printf("ERROR: Failed with the following error:\n\n%s\n\n", err)
 		os.Exit(1)
 	}
-	outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+	outStr, errStr := stdout.String(), stderr.String()
 	fmt.Printf("out %d:\n%s\nerr:\n%s\n", num, outStr, errStr)
 }
